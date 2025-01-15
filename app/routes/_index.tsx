@@ -1,5 +1,6 @@
 import type { Route } from "./+types/_index";
 import { getDatabase } from "~/libs/notion";
+import { compareAsc } from "date-fns";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,7 +38,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 function transformData(valuesByDate: Record<string, { milk: number; breastMilk: number }>) {
   const sortedDates = Object.keys(valuesByDate).sort((a, b) => 
-    new Date(a).getTime() - new Date(b).getTime()
+    compareAsc(new Date(a), new Date(b))
   );
   const labels = sortedDates;
   const milkQuantities = sortedDates.map(date => valuesByDate[date].milk);

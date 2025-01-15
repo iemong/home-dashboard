@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { subDays, startOfDay, formatISO, format } from "date-fns";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
@@ -7,9 +8,9 @@ const client = new Client({
 })
 
 export const getDatabase = async () => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  oneWeekAgo.setHours(0, 0, 0, 0); // Set to start of day
+  const now = new Date();
+  const today = startOfDay(now);
+  const oneWeekAgo = subDays(today, 6); // 6 days ago to get 7 days total (including today)
   
   const response = await client.databases.query({
     database_id: import.meta.env.VITE_NOTION_DATABASE_ID,
@@ -34,7 +35,7 @@ export const getDatabase = async () => {
         {
           property: "Registered time",
           date: {
-            after: oneWeekAgo.toISOString(),
+            after: formatISO(oneWeekAgo),
           },
         },
       ],
@@ -44,7 +45,7 @@ export const getDatabase = async () => {
   
   const grouped = Object.groupBy(logs, (log) => {
     const date = new Date(log["Registered time"].date.start);
-    return date.toISOString().split('T')[0]; // Group by YYYY-MM-DD
+    return format(date, 'yyyy-MM-dd'); // Group by YYYY-MM-DD
   });
   
   const valuesByDate = Object.fromEntries(Object.entries(grouped).map(([date, logs]) => {
