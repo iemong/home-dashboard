@@ -48,7 +48,7 @@ function transformData(valuesByDate: Record<string, { milk: number; breastMilk: 
     labels,
     datasets: [
       {
-        label: 'Milk (ml)',
+        label: 'ミルク(ml)',
         data: milkQuantities,
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         borderColor: 'rgba(75, 192, 192, 1)',
@@ -56,7 +56,7 @@ function transformData(valuesByDate: Record<string, { milk: number; breastMilk: 
         stack: 'combined',
       },
       {
-        label: 'Breast Milk (ml)',
+        label: '母乳(ml)',
         data: breastMilkQuantities,
         backgroundColor: 'rgba(255, 159, 64, 0.5)',
         borderColor: 'rgba(255, 159, 64, 1)',
@@ -79,7 +79,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       },
       title: {
         display: true,
-        text: 'Child Care Logs - Milk and Breastfeeding',
+        text: '一週間の授乳量',
       },
       datalabels: {
         display: true,
