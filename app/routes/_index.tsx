@@ -29,8 +29,8 @@ ChartJS.register(
 
 export function meta({ data }: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "赤ちゃんお食事ログ" },
+    { name: "description", content: "赤ちゃんがおっぱいやミルクをどれだけ飲んだかを確認するページです。" },
   ];
 }
 
