@@ -4,7 +4,7 @@ import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 const client = new Client({
-  auth: import.meta.env.VITE_NOTION_TOKEN,
+  auth: process.env.NOTION_TOKEN,
 })
 
 export const getDatabase = async () => {
@@ -12,8 +12,10 @@ export const getDatabase = async () => {
   const today = startOfDay(now);
   const oneWeekAgo = subDays(today, 6); // 6 days ago to get 7 days total (including today)
   
+  
   const response = await client.databases.query({
-    database_id: import.meta.env.VITE_NOTION_DATABASE_ID,
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    database_id: process.env.NOTION_DATABASE_ID!,
     filter: {
       and: [
         {

@@ -1,5 +1,5 @@
 import type { Route } from "./+types/_index";
-import { getDatabase } from "~/libs/notion";
+import { getDatabase } from "~/libs/notion.server";
 import { compareAsc } from "date-fns";
 import {
   Chart as ChartJS,
