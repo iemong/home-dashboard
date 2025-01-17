@@ -2,6 +2,8 @@ import type { Route } from "./+types/_index";
 import { getChildCareTotalsByDate, getTodayChildCareLogs } from "~/libs/notion.server";
 import { ChildCareLogList } from "~/components/ChildCareLogList";
 import { compareAsc } from "date-fns";
+import { useRevalidator } from "react-router";
+import { useEffect } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -77,7 +79,16 @@ function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: 
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { weeklyTotals, todayLogs } = loaderData ?? { weeklyTotals: {}, todayLogs: [] };
+  const { revalidate } = useRevalidator();
   const chartData = transformData(weeklyTotals);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      revalidate();
+    }, 60 * 1000 * 10); // 10 minutes
+
+    return () => clearInterval(interval);
+  }, [revalidate]);
 
   const options = {
     responsive: true,
