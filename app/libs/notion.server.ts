@@ -47,7 +47,7 @@ export const getDatabase = async () => {
   const logs = (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
   
   const grouped = Object.groupBy(logs, (log) => {
-    const date = new Date(log["Registered time"].date.start);
+    const date = toZonedTime(new Date(log["Registered time"].date.start), 'Asia/Tokyo');
     return format(date, 'yyyy-MM-dd'); // Group by YYYY-MM-DD
   });
   
