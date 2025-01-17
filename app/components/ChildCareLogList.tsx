@@ -11,13 +11,13 @@ export function ChildCareLogList({ logs }: ChildCareLogListProps) {
       <div className="divide-y divide-gray-200">
         {logs.map((log) => (
           <div key={log["Childcare id"].unique_id.number} className="p-2">
-            <div className="flex justify-between items-center gap-12">
-              <p className="text-sm text-gray-600">
+            <div className="flex justify-between items-center gap-12 text-sm text-gray-600">
+              <p>
                 {new Date(log["Registered time"].date.start).toLocaleTimeString('ja-JP', { timeStyle: 'short' })}
               </p>
               <div className="flex gap-2 items-center">
-                <p>{log.Name.title[0]?.plain_text}</p>
-                <p className="text-sm text-gray-600 w-[3em] text-right">
+                <p>{log.Kind.select?.name}</p>
+                <p className="w-[3em] text-right">
                   {log.Quantity.number}ml
                 </p>
               </div>
