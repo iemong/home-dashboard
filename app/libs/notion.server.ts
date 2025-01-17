@@ -8,7 +8,7 @@ const client = new Client({
   auth: process.env.NOTION_TOKEN,
 })
 
-export const getDatabase = async () => {
+export const getChildCareTotalsByDate = async () => {
   const now = toZonedTime(new Date(), 'Asia/Tokyo');
   const today = startOfDay(now);
   const oneWeekAgo = subDays(today, 6); // 6 days ago to get 7 days total (including today)
