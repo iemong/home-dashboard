@@ -1,5 +1,6 @@
 import type { Route } from "./+types/_index";
-import { getDatabase } from "~/libs/notion.server";
+import { getChildCareTotalsByDate, getTodayChildCareLogs } from "~/libs/notion.server";
+import { ChildCareLogList } from "~/components/ChildCareLogList";
 import { compareAsc } from "date-fns";
 import {
   Chart as ChartJS,
@@ -32,17 +33,24 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const res = await getDatabase();
-  return res;
+  const [weeklyTotals, todayLogs] = await Promise.all([
+    getChildCareTotalsByDate(),
+    getTodayChildCareLogs()
+  ]);
+  
+  return {
+    weeklyTotals,
+    todayLogs
+  };
 }
 
-function transformData(valuesByDate: Record<string, { milk: number; breastMilk: number }>) {
-  const sortedDates = Object.keys(valuesByDate).sort((a, b) => 
+function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: number }>) {
+  const sortedDates = Object.keys(weeklyTotals).sort((a, b) =>
     compareAsc(new Date(a), new Date(b))
   );
   const labels = sortedDates;
-  const milkQuantities = sortedDates.map(date => valuesByDate[date].milk);
-  const breastMilkQuantities = sortedDates.map(date => valuesByDate[date].breastMilk);
+  const milkQuantities = sortedDates.map(date => weeklyTotals[date].milk);
+  const breastMilkQuantities = sortedDates.map(date => weeklyTotals[date].breastMilk);
 
   return {
     labels,
@@ -68,18 +76,14 @@ function transformData(valuesByDate: Record<string, { milk: number; breastMilk: 
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const valuesByDate = loaderData ?? {};
-  const chartData = transformData(valuesByDate);
+  const { weeklyTotals, todayLogs } = loaderData ?? { weeklyTotals: {}, todayLogs: [] };
+  const chartData = transformData(weeklyTotals);
 
   const options = {
     responsive: true,
     plugins: {
       legend: {
         position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: '一週間の授乳量',
       },
       datalabels: {
         display: true,
@@ -107,9 +111,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      {/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
-      <Bar options={options as any} data={chartData} />
+    <div className="flex gap-8 px-8 py-4">
+      <div className="max-w-[800px] flex-1">
+        <h2 className="text-xl font-bold mb-4">1週間の授乳量</h2>
+        {/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
+        <Bar options={options as any} data={chartData} />
+      </div>
+      <ChildCareLogList logs={todayLogs} />
     </div>
   );
 }

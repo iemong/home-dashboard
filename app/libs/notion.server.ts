@@ -63,3 +63,41 @@ export const getChildCareTotalsByDate = async () => {
   
   return valuesByDate;
 }
+
+export const getTodayChildCareLogs = async () => {
+  const now = toZonedTime(new Date(), 'Asia/Tokyo');
+  const todayStart = startOfDay(now);
+  
+  const response = await client.databases.query({
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    database_id: process.env.NOTION_DATABASE_ID!,
+    filter: {
+      and: [
+        {
+          or: [
+            {
+              property: "Kind",
+              select: {
+                equals: "ミルク",
+              },
+            },
+            {
+              property: "Kind",
+              select: {
+                equals: "おっぱい",
+              },
+            },
+          ],
+        },
+        {
+          property: "Registered time",
+          date: {
+            after: formatISO(todayStart)
+          },
+        },
+      ],
+    },
+  });
+
+  return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
+}
