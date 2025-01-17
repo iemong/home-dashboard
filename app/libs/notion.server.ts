@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { subDays, startOfDay, formatISO, format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
@@ -8,7 +9,7 @@ const client = new Client({
 })
 
 export const getDatabase = async () => {
-  const now = new Date();
+  const now = toZonedTime(new Date(), 'Asia/Tokyo');
   const today = startOfDay(now);
   const oneWeekAgo = subDays(today, 6); // 6 days ago to get 7 days total (including today)
   
