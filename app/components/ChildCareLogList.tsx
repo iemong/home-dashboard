@@ -11,7 +11,7 @@ export function ChildCareLogList({ logs }: ChildCareLogListProps) {
       <div className="divide-y divide-gray-200">
         {logs.map((log) => (
           <div key={log["Childcare id"].unique_id.number} className="p-2">
-            <div className="flex justify-between items-center gap-12 text-sm text-gray-600">
+            <div className="flex justify-between items-center gap-12 text-lg text-gray-600">
               <p>
                 {new Date(log["Registered time"].date.start).toLocaleTimeString('ja-JP', { timeStyle: 'short' })}
               </p>
