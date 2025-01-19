@@ -92,14 +92,14 @@ export const getTodayChildCareLogs = async () => {
         {
           property: "Registered time",
           date: {
-            on_or_after: formatISO(todayStart)
+            on_or_after: todayStart.toISOString(),
           },
         },
       ],
     },
   });
 
-  console.log(formatISO(todayStart))
+  console.log(todayStart)
 
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
