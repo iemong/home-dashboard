@@ -11,7 +11,7 @@ const client = new Client({
 })
 
 export const getChildCareTotalsByDate = async () => {
-  const now = toZonedTime(new Date(), 'Asia/Tokyo');
+  const now = toZonedTime(new Date(), TIME_ZONE);
   const today = startOfDay(now);
   const oneWeekAgo = subDays(today, 6); // 6 days ago to get 7 days total (including today)
   
@@ -49,7 +49,7 @@ export const getChildCareTotalsByDate = async () => {
   const logs = (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
   
   const grouped = Object.groupBy(logs, (log) => {
-    const date = toZonedTime(new Date(log["Registered time"].date.start), 'Asia/Tokyo');
+    const date = toZonedTime(new Date(log["Registered time"].date.start), TIME_ZONE);
     return format(date, 'yyyy-MM-dd'); // Group by YYYY-MM-DD
   });
   
