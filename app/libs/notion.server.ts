@@ -66,7 +66,9 @@ export const getChildCareTotalsByDate = async () => {
 
 export const getTodayChildCareLogs = async () => {
   const now = toZonedTime(new Date(), 'Asia/Tokyo');
+  const now2 = new Date();
   const todayStart = startOfDay(now); 
+  const todayStart2 = startOfDay(now2);
   
   const response = await client.databases.query({
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
@@ -100,6 +102,7 @@ export const getTodayChildCareLogs = async () => {
   });
 
   console.log(formatISO(todayStart), todayStart.toISOString(), formatISO(now), now.toISOString())
+  console.log(formatISO(todayStart2), todayStart2.toISOString(), formatISO(now2), now2.toISOString())
 
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
