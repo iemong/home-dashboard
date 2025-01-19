@@ -1,6 +1,6 @@
 import { Client } from "@notionhq/client";
 import { subDays, startOfDay, formatISO, format, subHours } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
@@ -69,7 +69,7 @@ export const getTodayChildCareLogs = async () => {
   const now2 = new Date();
   const todayStart = startOfDay(now); 
   const todayStart2 = startOfDay(now2);
-  const todayStart3 = toZonedTime(startOfDay(now), 'Asia/Tokyo');
+  const todayStart3 = fromZonedTime(todayStart, 'Asia/Tokyo')
   console.log(formatISO(todayStart), todayStart.toISOString(), formatISO(now), now.toISOString())
   console.log(formatISO(todayStart2), todayStart2.toISOString(), formatISO(now2), now2.toISOString())
   console.log(formatISO(todayStart3), todayStart3.toISOString())
@@ -104,9 +104,6 @@ export const getTodayChildCareLogs = async () => {
       ],
     },
   });
-
-  console.log(formatISO(todayStart), todayStart.toISOString(), formatISO(now), now.toISOString())
-  console.log(formatISO(todayStart2), todayStart2.toISOString(), formatISO(now2), now2.toISOString())
 
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
