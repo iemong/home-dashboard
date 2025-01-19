@@ -1,5 +1,12 @@
 import type { Route } from "./+types/_index";
-import { getChildCareTotalsByDate, getTodayChildCareLogs } from "~/libs/notion.server";
+import type { ChildCareLog } from "~/libs/child-care-log";
+
+interface LoaderData {
+  weeklyTotals: Record<string, { milk: number; breastMilk: number }>;
+  todayLogs: ChildCareLog[];
+  lastMilkTime: Date | null;
+}
+import { getChildCareTotalsByDate, getTodayChildCareLogs, getLastMilkTime } from "~/libs/notion.server";
 import { ChildCareLogList } from "~/components/ChildCareLogList";
 import { compareAsc } from "date-fns";
 import { useRevalidator } from "react-router";
@@ -35,15 +42,17 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const [weeklyTotals, todayLogs] = await Promise.all([
+  const [weeklyTotals, todayLogs, lastMilkTime] = await Promise.all([
     getChildCareTotalsByDate(),
-    getTodayChildCareLogs()
+    getTodayChildCareLogs(),
+    getLastMilkTime()
   ]);
   
   return {
     weeklyTotals,
-    todayLogs
-  };
+    todayLogs,
+    lastMilkTime
+  } as LoaderData;
 }
 
 function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: number }>) {
@@ -78,7 +87,11 @@ function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: 
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { weeklyTotals, todayLogs } = loaderData ?? { weeklyTotals: {}, todayLogs: [] };
+  const { weeklyTotals, todayLogs, lastMilkTime } = loaderData ?? {
+    weeklyTotals: {},
+    todayLogs: [],
+    lastMilkTime: null
+  };
   const { revalidate } = useRevalidator();
   const chartData = transformData(weeklyTotals);
 
@@ -123,10 +136,28 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="flex gap-8 px-8 py-4">
-      <div className="max-w-[800px] flex-1">
-        <h2 className="text-xl font-bold mb-4">1週間の授乳量</h2>
-        {/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
-        <Bar options={options as any} data={chartData} />
+      <div className="flex-1">
+        <div className="max-w-[800px]">
+          <h2 className="text-xl font-bold mb-4">1週間の授乳量</h2>
+          {/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
+          <Bar options={options as any} data={chartData} />
+        </div>
+        <div>
+        {lastMilkTime && (
+          <div className="mt-8 py-6 px-6 bg-gray-50 flex justify-center items-center flex-col rounded-full border w-fit">
+            <h3 className="font-semibold mb-2">最後にミルクを飲んだ時間</h3>
+            <p className="text-xl font-bold">
+              {new Date(lastMilkTime).toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+              })}
+            </p>
+          </div>
+        )}
+        </div>
       </div>
       <ChildCareLogList logs={todayLogs} />
     </div>

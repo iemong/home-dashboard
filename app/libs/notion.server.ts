@@ -101,3 +101,37 @@ export const getTodayChildCareLogs = async () => {
 
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
+
+export const getLastMilkTime = async () => {
+  const response = await client.databases.query({
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    database_id: process.env.NOTION_DATABASE_ID!,
+    filter: {
+      property: "Kind",
+      select: {
+        equals: "ミルク",
+      },
+    },
+    sorts: [
+      {
+        property: "Registered time",
+        direction: "descending",
+      },
+    ],
+    page_size: 1,
+  });
+
+  if (response.results.length === 0) {
+    return null;
+  }
+
+  const result = response.results[0] as DatabaseObjectResponse;
+  const properties = result.properties as unknown as ChildCareLog;
+  const registeredTime = properties["Registered time"].date?.start;
+  
+  if (!registeredTime) {
+    return null;
+  }
+  
+  return toZonedTime(new Date(registeredTime), 'Asia/Tokyo');
+}
