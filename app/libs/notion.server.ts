@@ -99,6 +99,8 @@ export const getTodayChildCareLogs = async () => {
     },
   });
 
+  console.log(formatISO(todayStart))
+
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
 
