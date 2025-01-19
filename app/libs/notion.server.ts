@@ -69,6 +69,10 @@ export const getTodayChildCareLogs = async () => {
   const now2 = new Date();
   const todayStart = startOfDay(now); 
   const todayStart2 = startOfDay(now2);
+  const todayStart3 = toZonedTime(startOfDay(now), 'Asia/Tokyo');
+  console.log(formatISO(todayStart), todayStart.toISOString(), formatISO(now), now.toISOString())
+  console.log(formatISO(todayStart2), todayStart2.toISOString(), formatISO(now2), now2.toISOString())
+  console.log(formatISO(todayStart3), todayStart3.toISOString())
   
   const response = await client.databases.query({
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
