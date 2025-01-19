@@ -65,7 +65,7 @@ export const getChildCareTotalsByDate = async () => {
 }
 
 export const getTodayChildCareLogs = async () => {
-  const now = toZonedTime(new Date(), 'Asia/Tokyo');
+  const now = new Date();
   const todayStart = startOfDay(now);
   
   const response = await client.databases.query({
