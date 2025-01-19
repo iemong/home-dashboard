@@ -4,6 +4,8 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
+const TIME_ZONE = "Asia/Tokyo";
+
 const client = new Client({
   auth: process.env.NOTION_TOKEN,
 })
@@ -65,14 +67,9 @@ export const getChildCareTotalsByDate = async () => {
 }
 
 export const getTodayChildCareLogs = async () => {
-  const now = toZonedTime(new Date(), 'Asia/Tokyo');
-  const now2 = new Date();
+  const now = toZonedTime(new Date(), TIME_ZONE);
   const todayStart = startOfDay(now); 
-  const todayStart2 = startOfDay(now2);
-  const todayStart3 = fromZonedTime(todayStart, 'Asia/Tokyo')
-  console.log(formatISO(todayStart), todayStart.toISOString(), formatISO(now), now.toISOString())
-  console.log(formatISO(todayStart2), todayStart2.toISOString(), formatISO(now2), now2.toISOString())
-  console.log(formatISO(todayStart3), todayStart3.toISOString())
+  const todayStartUtc = fromZonedTime(todayStart, TIME_ZONE)
   
   const response = await client.databases.query({
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
@@ -98,7 +95,7 @@ export const getTodayChildCareLogs = async () => {
         {
           property: "Registered time",
           date: {
-            on_or_after: todayStart.toISOString(),
+            on_or_after: todayStartUtc.toISOString(),
           },
         },
       ],
