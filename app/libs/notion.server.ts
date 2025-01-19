@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { subDays, startOfDay, formatISO, format, subHours } from "date-fns";
+import { subDays, startOfDay, formatISO, format, subHours, addHours } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
@@ -105,7 +105,7 @@ export const getTodayChildCareLogs = async () => {
   return (response.results as DatabaseObjectResponse[]).map(result => result.properties) as unknown as ChildCareLog[];
 }
 
-export const getLastMilkTime = async () => {
+export const getNextMilkTime = async () => {
   const response = await client.databases.query({
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
     database_id: process.env.NOTION_DATABASE_ID!,
@@ -136,5 +136,5 @@ export const getLastMilkTime = async () => {
     return null;
   }
   
-  return toZonedTime(new Date(registeredTime), 'Asia/Tokyo');
+  return addHours(new Date(registeredTime), 3);
 }

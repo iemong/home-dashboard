@@ -4,9 +4,9 @@ import type { ChildCareLog } from "~/libs/child-care-log";
 interface LoaderData {
   weeklyTotals: Record<string, { milk: number; breastMilk: number }>;
   todayLogs: ChildCareLog[];
-  lastMilkTime: Date | null;
+  nextMilkTime: Date | null;
 }
-import { getChildCareTotalsByDate, getTodayChildCareLogs, getLastMilkTime } from "~/libs/notion.server";
+import { getChildCareTotalsByDate, getTodayChildCareLogs, getNextMilkTime } from "~/libs/notion.server";
 import { ChildCareLogList } from "~/components/ChildCareLogList";
 import { compareAsc } from "date-fns";
 import { useRevalidator } from "react-router";
@@ -42,16 +42,16 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const [weeklyTotals, todayLogs, lastMilkTime] = await Promise.all([
+  const [weeklyTotals, todayLogs, nextMilkTime] = await Promise.all([
     getChildCareTotalsByDate(),
     getTodayChildCareLogs(),
-    getLastMilkTime()
+    getNextMilkTime()
   ]);
   
   return {
     weeklyTotals,
     todayLogs,
-    lastMilkTime
+    nextMilkTime
   } as LoaderData;
 }
 
@@ -87,7 +87,7 @@ function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: 
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { weeklyTotals, todayLogs, lastMilkTime } = loaderData ?? {
+  const { weeklyTotals, todayLogs, nextMilkTime } = loaderData ?? {
     weeklyTotals: {},
     todayLogs: [],
     lastMilkTime: null
@@ -143,11 +143,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <Bar options={options as any} data={chartData} />
         </div>
         <div>
-        {lastMilkTime && (
+        {nextMilkTime && (
           <div className="mt-8 py-6 px-6 bg-gray-50 flex justify-center items-center flex-col rounded-full border w-fit">
             <h3 className="font-semibold mb-2">最後にミルクを飲んだ時間</h3>
             <p className="text-xl font-bold">
-              {new Date(lastMilkTime).toLocaleString('ja-JP', {
+              {new Date(nextMilkTime).toLocaleString('ja-JP', {
                 year: 'numeric',
                 month: 'numeric',
                 day: 'numeric',
