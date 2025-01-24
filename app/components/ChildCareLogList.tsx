@@ -8,10 +8,10 @@ export function ChildCareLogList({ logs }: ChildCareLogListProps) {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">今日の記録</h2>
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-gray-400">
         {logs.map((log) => (
           <div key={log["Childcare id"].unique_id.number} className="p-2">
-            <div className="flex justify-between items-center gap-12 text-lg text-gray-600">
+            <div className="flex justify-between items-center gap-12 text-lg text-gray-400">
               <p>
                 {new Date(log["Registered time"].date.start).toLocaleTimeString('ja-JP', { timeStyle: 'short' })}
               </p>

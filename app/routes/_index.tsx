@@ -144,7 +144,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
         <div>
         {nextMilkTime && (
-          <div className="mt-8 py-6 px-6 bg-gray-50 flex justify-center items-center flex-col rounded-full border w-fit">
+          <div className="mt-8 py-6 px-6 bg-gray-800 flex justify-center items-center flex-col rounded-full border w-fit">
             <h3 className="font-semibold mb-2">次にミルクを飲む時間</h3>
             <p className="text-xl font-bold">
               {new Date(nextMilkTime).toLocaleString('ja-JP', {
