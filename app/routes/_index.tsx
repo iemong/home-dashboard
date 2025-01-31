@@ -46,7 +46,13 @@ export async function loader({ context }: Route.LoaderArgs) {
     getChildCareTotalsByDate(),
     getTodayChildCareLogs(),
     getNextMilkTime()
-  ]);
+  ]).catch(() => {
+    return [
+      {},
+      [],
+      null
+    ];
+  });
   
   return {
     weeklyTotals,
