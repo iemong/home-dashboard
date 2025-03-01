@@ -5,8 +5,15 @@ interface LoaderData {
   weeklyTotals: Record<string, { milk: number; breastMilk: number }>;
   todayLogs: ChildCareLog[];
   nextMilkTime: Date | null;
+  latestWeight: {
+    currentWeight: number;
+    weightGain: number;
+    dailyGain: number;
+    daysSinceBirth: number;
+    registeredDate: string;
+  } | null;
 }
-import { getChildCareTotalsByDate, getTodayChildCareLogs, getNextMilkTime } from "~/libs/notion.server";
+import { getChildCareTotalsByDate, getTodayChildCareLogs, getNextMilkTime, getLatestWeight } from "~/libs/notion.server";
 import { ChildCareLogList } from "~/components/ChildCareLogList";
 import { compareAsc } from "date-fns";
 import { useRevalidator } from "react-router";
@@ -42,14 +49,16 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const [weeklyTotals, todayLogs, nextMilkTime] = await Promise.all([
+  const [weeklyTotals, todayLogs, nextMilkTime, latestWeight] = await Promise.all([
     getChildCareTotalsByDate(),
     getTodayChildCareLogs(),
-    getNextMilkTime()
+    getNextMilkTime(),
+    getLatestWeight()
   ]).catch(() => {
     return [
       {},
       [],
+      null,
       null
     ];
   });
@@ -57,7 +66,8 @@ export async function loader({ context }: Route.LoaderArgs) {
   return {
     weeklyTotals,
     todayLogs,
-    nextMilkTime
+    nextMilkTime,
+    latestWeight
   } as LoaderData;
 }
 
@@ -93,10 +103,11 @@ function transformData(weeklyTotals: Record<string, { milk: number; breastMilk: 
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { weeklyTotals, todayLogs, nextMilkTime } = loaderData ?? {
+  const { weeklyTotals, todayLogs, nextMilkTime, latestWeight } = loaderData ?? {
     weeklyTotals: {},
     todayLogs: [],
-    lastMilkTime: null
+    nextMilkTime: null,
+    latestWeight: null
   };
   const { revalidate } = useRevalidator();
   const chartData = transformData(weeklyTotals);
@@ -148,7 +159,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           {/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
           <Bar options={options as any} data={chartData} />
         </div>
-        <div>
+        <div className="flex gap-8">
         {nextMilkTime && (
           <div className="mt-8 py-6 px-6 bg-gray-800 flex justify-center items-center flex-col rounded-full border w-fit">
             <h3 className="font-semibold mb-2">次にミルクを飲む時間</h3>
@@ -161,6 +172,18 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 minute: 'numeric'
               })}
             </p>
+          </div>
+        )}
+        
+        {latestWeight && (
+          <div className="mt-8 py-6 px-6 bg-gray-800 flex justify-center items-center flex-col rounded-lg border">
+            <h3 className="font-semibold mb-2">体重情報</h3>
+            <p className="text-xl font-bold">{latestWeight.currentWeight}g</p>
+            <div className="mt-2 text-sm">
+              <p>1日あたり: {latestWeight.dailyGain}g/日</p>
+              <p>生後: {latestWeight.daysSinceBirth}日</p>
+              <p>測定日: {latestWeight.registeredDate}</p>
+            </div>
           </div>
         )}
         </div>

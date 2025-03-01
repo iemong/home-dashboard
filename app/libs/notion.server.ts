@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { subDays, startOfDay, formatISO, format, subHours, addHours } from "date-fns";
+import { subDays, startOfDay, formatISO, format, subHours, addHours, differenceInDays } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import type { ChildCareLog } from "./child-care-log";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
@@ -137,4 +137,62 @@ export const getNextMilkTime = async () => {
   }
   
   return addHours(new Date(registeredTime), 3);
+}
+
+export const getLatestWeight = async () => {
+  const response = await client.databases.query({
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    database_id: process.env.NOTION_DATABASE_ID!,
+    filter: {
+      property: "Kind",
+      select: {
+        equals: "体重",
+      },
+    },
+    sorts: [
+      {
+        property: "Registered time",
+        direction: "descending",
+      },
+    ],
+    page_size: 1
+  });
+
+  if (response.results.length === 0) {
+    return null;
+  }
+
+  const result = response.results[0] as DatabaseObjectResponse;
+  const properties = result.properties as unknown as ChildCareLog;
+  
+  // 出生時の体重
+  const birthWeight = 3440;
+  // 誕生日
+  const birthDate = new Date('2024-12-18');
+  
+  const currentWeight = properties.Quantity.number;
+  const registeredTime = properties["Registered time"].date?.start;
+  
+  if (!registeredTime) {
+    return null;
+  }
+  
+  const registeredDate = toZonedTime(new Date(registeredTime), TIME_ZONE);
+  
+  // 誕生日からの経過日数を計算（date-fnsのdifferenceInDaysを使用）
+  const daysSinceBirth = differenceInDays(registeredDate, birthDate);
+  
+  // 体重の増加量
+  const weightGain = currentWeight - birthWeight;
+  
+  // 1日あたりの増加量
+  const dailyGain = daysSinceBirth > 0 ? Math.round((weightGain / daysSinceBirth) * 10) / 10 : 0;
+  
+  return {
+    currentWeight,
+    weightGain,
+    dailyGain,
+    daysSinceBirth,
+    registeredDate: format(registeredDate, 'yyyy/MM/dd'),
+  };
 }
